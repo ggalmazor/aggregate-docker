@@ -1,18 +1,19 @@
-# tomcat comes from http://apache.rediris.es/tomcat/tomcat-8/v8.0.50/bin/apache-tomcat-8.0.50.zip
+FROM alpine:latest as unzipper
+ADD http://www-us.apache.org/dist/tomcat/tomcat-8/v8.0.50/bin/apache-tomcat-8.0.50.zip /tmp/
+ADD https://s3.amazonaws.com/odk/aggregate-v1.4.15.zip /tmp/
+RUN unzip /tmp/apache-tomcat-8.0.50.zip -d /tmp
+RUN mv /tmp/apache-tomcat-8.0.50 /tmp/tomcat
+RUN rm -r /tmp/tomcat/webapps/*
+RUN unzip /tmp/aggregate-v1.4.15.zip -d /tmp/tomcat/webapps
+RUN chmod +x /tmp/tomcat/bin/*.sh
+
 FROM postgres:9.6-alpine
 
 EXPOSE 5432 8080
 
-RUN mkdir -p /opt/tomcat
-ADD ./apache-tomcat-8.0.50/ /opt/tomcat/
-RUN rm -r /opt/tomcat/webapps/ROOT/*
-
-ADD ./ROOT/ /opt/tomcat/webapps/ROOT/
-
-RUN apk add --no-cache openjdk8-jre unzip && chmod +x /opt/tomcat/bin/*.sh
-
 ADD ./init.sh /docker-entrypoint-initdb.d/
 ADD ./start.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/start.sh
+COPY --from=unzipper /tmp/tomcat /
+RUN apk add --no-cache openjdk8-jre unzip && chmod +x /usr/local/bin/start.sh
 
 CMD ["start.sh"]

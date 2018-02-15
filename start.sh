@@ -9,4 +9,4 @@ wait_for_port() {
 /usr/local/bin/docker-entrypoint.sh postgres &
 sleep 5
 wait_for_port 5432
-/opt/tomcat/bin/catalina.sh run
+/tomcat/bin/catalina.sh run
