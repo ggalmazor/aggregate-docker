@@ -13,7 +13,8 @@ EXPOSE 5432 8080
 
 ADD ./init.sh /docker-entrypoint-initdb.d/
 ADD ./start.sh /usr/local/bin/
-COPY --from=unzipper /tmp/tomcat /
+RUN mkdir /tomcat
+COPY --from=unzipper /tmp/tomcat/ /tomcat/
 RUN apk add --no-cache openjdk8-jre unzip && chmod +x /usr/local/bin/start.sh
 
 CMD ["start.sh"]
